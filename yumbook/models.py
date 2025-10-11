@@ -8,18 +8,12 @@ from django.urls import reverse
 # Create your models here.
 
 
-class IngredientsQuantity(models.Model):
-    item = models.CharField(max_length=250)
-    quantity = models.CharField(max_length=100)
-
-    def __str__(self):
-        return f"{self.item} - {self.quantity}"
 
 
 class Recipe(models.Model):
     recipe_id = models.IntegerField(null=True, blank=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="recipes")
     title = models.CharField(max_length=250)
-    ingredients = models.ManyToManyField(IngredientsQuantity, related_name="recipes")
     instructions = models.TextField(null=True, blank=True)
     cook_time = models.DurationField()
     prep_time = models.DurationField()
@@ -38,6 +32,17 @@ class Recipe(models.Model):
             ("can_delete_recipe", "Can delete recipes"),
         ]
 
+
+class IngredientsQuantity(models.Model):
+    item = models.CharField(max_length=250)
+    quantity = models.CharField(max_length=100)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name="recipes")
+
+    def __str__(self):
+        return f"{self.item} - {self.quantity}"
+
+
+
 class UserProfile(models.Model):
     user= models.OneToOneField(User, on_delete=models.CASCADE)
     def __str__(self):
@@ -55,4 +60,4 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
-    instance.UserProfile.save()
+    instance.userProfile.save()
