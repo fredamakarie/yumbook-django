@@ -6,6 +6,8 @@ from .models import Recipe
 from .forms import RecipeForm, IngredientFormSet
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, View
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from rest_framework import viewsets, permissions
+from .serializers import RecipeSerializer
 
 # Create your views here.
 
@@ -81,9 +83,22 @@ class RecipeDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return self.request.user == recipe.author  # only if author field exists
 
 
-
-
-
 #------------
 # API VIEWS
 #------------
+
+
+class RecipeViewSet(viewsets.ModelViewSet):
+    queryset = Recipe.objects.all()
+    serializer_class = RecipeSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def perform_create(self, serializer):
+        # Automatically assign the logged-in user as the author
+        serializer.save(author=self.request.user)
+
+    def get_queryset(self):
+        # Show all recipes or only the user's recipes if authenticated
+        if self.request.user.is_authenticated:
+            return Recipe.objects.filter(author=self.request.user)
+        return Recipe.objects.all()
