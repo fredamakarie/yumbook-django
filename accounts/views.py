@@ -11,6 +11,7 @@ from django.contrib.auth import get_user_model
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
+from django.contrib.auth.forms import AuthenticationForm
 
 
 # -----------
@@ -18,14 +19,15 @@ from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
 # -----------
 
 class SignUpView(CreateView):
-    """User registration view"""
+    """User accounts view"""
     form_class = UserCreationForm
     success_url = reverse_lazy('login')
-    template_name = 'registration/register.html'
+    template_name = 'accounts/register.html'
 
 
 class CustomLoginView(LoginView):
-    template_name = 'registration/login.html'
+    template_name = 'accounts/login.html'
+    form_class = AuthenticationForm
 
 
 class CustomLogoutView(LogoutView):
@@ -43,9 +45,9 @@ def my_login_view(request):
             login(request, user)
             return redirect("recipe-list")
         else:
-            return render(request, "registration/login.html", {"error": "Invalid credentials"})
+            return render(request, "accounts/login.html", {"error": "Invalid credentials"})
 
-    return render(request, "registration/login.html")
+    return render(request, "accounts/login.html")
 
 
 def my_logout_view(request):

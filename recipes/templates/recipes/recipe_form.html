@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Add Recipe{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'recipes/css/styles.css' %}">
+
+<div class="container">
+    <h2>Add New Recipe</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <h3>Recipe Details</h3>
+        {{ form.as_p }}
+
+        <hr>
+        <h3>Ingredients</h3>
+        {{ formset.management_form }}
+
+        <div id="ingredient-list">
+            {% for form in formset %}
+                <div class="ingredient-form" style="margin-bottom: 1rem; border: 1px solid #eee; padding: 1rem; border-radius: 8px;">
+                    {{ form.as_p }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <button type="submit">Save Recipe</button>
+    </form>
+</div>
+
+<script>
+    // optional: dynamically add new ingredient forms (basic JS, no framework)
+    const totalForms = document.querySelector('#id_form-TOTAL_FORMS');
+    const formList = document.querySelector('#ingredient-list');
+    const emptyFormTemplate = formList.children[0].cloneNode(true);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === '+' && e.ctrlKey) {
+            e.preventDefault();
+            const newForm = emptyFormTemplate.cloneNode(true);
+            const formIndex = parseInt(totalForms.value);
+            newForm.innerHTML = newForm.innerHTML.replace(/form-0/g, `form-${formIndex}`);
+            totalForms.value = formIndex + 1;
+            formList.appendChild(newForm);
+        }
+    });
+</script>
+{% endblock %}

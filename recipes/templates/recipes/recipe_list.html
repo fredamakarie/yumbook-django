@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 {% block title %}All Recipes{% endblock %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'recipes/css/styles.css' %}">
 {% block content %}
+
 <div class="container">
     <h2>All Recipes</h2>
     <div class="grid">

@@ -20,19 +20,19 @@ from .serializers import RecipeSerializer
 class RecipeListView(ListView):
     """List all recipes"""
     model = Recipe
-    template_name = 'recipe_list.html'
+    template_name = 'recipes/recipe_list.html'
     context_object_name = 'recipes'
 
 
 class RecipeDetailView(DetailView):
     """View details of a recipe"""
     model = Recipe
-    template_name = 'recipe_detail.html'
+    template_name = 'recipes/recipe_detail.html'
 
 
 class RecipeCreateView(LoginRequiredMixin, View):
     """Create recipe with ingredients"""
-    template_name = 'recipe_form.html'
+    template_name = 'recipes/recipe_form.html'
     success_url = reverse_lazy('recipe-list')
 
     def get(self, request, *args, **kwargs):

@@ -32,3 +32,16 @@ class CustomUserChangeForm(UserChangeForm):
             "bio",
             "profile_picture",
         )
+
+"""class CustomLogInForm(UserCreationForm):
+    #Form for authenticating users.
+    email = forms.EmailField(required=True)
+
+    class Meta:
+        model = CustomUser
+        fields = (
+            "username",
+            "password",
+            
+        )"""
+

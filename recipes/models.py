@@ -11,8 +11,9 @@ class Recipe(models.Model):
     cook_time = models.DurationField(null=True, blank=True)
     prep_time = models.DurationField(null=True, blank=True)
     images = models.ImageField(upload_to="recipe_photos/", null=True, blank=True)
-    category = models.CharField(max_length=250)
-    
+    category = models.CharField(max_length=250, null=True, blank=True)
+    servings = models.PositiveSmallIntegerField(default=0)
+
 
 
     def __str__(self):
