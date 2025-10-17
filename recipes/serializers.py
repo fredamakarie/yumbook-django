@@ -8,7 +8,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    ingredients = IngredientSerializer(many=True, read_only=True)
+    ingredients = IngredientSerializer(many=True)
     author = serializers.ReadOnlyField(source='author.username')
 
     class Meta:
@@ -23,13 +23,21 @@ class RecipeSerializer(serializers.ModelSerializer):
 
         # Create the ingredients
         for ingredient in ingredients_data:
-            IngredientsQuantity.objects.create(recipe=recipe, **ingredient)
+            ingredient, _ = IngredientsQuantity.objects.create(recipe=recipe, **ingredient)
 
         return recipe
-
+    
+    
     def update(self, instance, validated_data):
         ingredients_data = validated_data.pop('ingredients', [])
-        
+        instance.title = validated_data.get('title', instance.title)
+        instance.instructions = validated_data.get('instructions', instance.instructions)
+        instance.cook_time = validated_data.get('cook_time', instance.cook_time)
+        instance.prep_time = validated_data.get('prep_time', instance.prep_time)
+        instance.category = validated_data.get('category', instance.category)
+        instance.save()
+
+
         # Update recipe fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)

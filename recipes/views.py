@@ -6,7 +6,7 @@ from .models import Recipe
 from .forms import RecipeForm, IngredientFormSet
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, View
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, filters
 from .serializers import RecipeSerializer
 
 # Create your views here.
@@ -92,6 +92,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['ingredients__item', 'category', 'title']
+    ordering_fields = ['prep_time', 'cook_time', 'servings', 'title']
+    ordering = ['title']  # default ordering
+
 
     def perform_create(self, serializer):
         # Automatically assign the logged-in user as the author

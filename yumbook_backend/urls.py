@@ -22,10 +22,12 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # Accounts routes (HTML + API handled inside)
     path('accounts/', include('accounts.urls')),
+
+    # Recipes routes (HTML + API handled inside)
     path('recipes/', include('recipes.urls')),
-    path('api/accounts/', include('accounts.urls')),
-    path('api/recipes/', include('recipes.urls')),
 ]
 
 
