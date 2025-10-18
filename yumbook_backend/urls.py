@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from rest_framework.authtoken import views
 
 
 urlpatterns = [
@@ -28,6 +29,10 @@ urlpatterns = [
 
     # Recipes routes (HTML + API handled inside)
     path('recipes/', include('recipes.urls')),
+
+    path('api-auth/', include('rest_framework.urls')),
+
+    path('api/token/', views.obtain_auth_token, name='api-token'),
 ]
 
 

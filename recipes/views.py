@@ -4,7 +4,7 @@ from django.views import View
 from django.urls import reverse_lazy
 from .models import Recipe
 from .forms import RecipeForm, IngredientFormSet
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, View
+from django.views.generic import ListView, DetailView, UpdateView, DeleteView, View
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from rest_framework import viewsets, permissions, filters
 from .serializers import RecipeSerializer
@@ -91,19 +91,29 @@ class RecipeDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['ingredients__item', 'category', 'title']
     ordering_fields = ['prep_time', 'cook_time', 'servings', 'title']
     ordering = ['title']  # default ordering
 
 
+
+    def get_queryset(self):
+        """Only show recipes belonging to the logged-in user."""
+        user = self.request.user
+        if user.is_authenticated:
+            return Recipe.objects.filter(author=user)
+        # No authentication = no recipes
+        return Recipe.objects.none()
+
+
     def perform_create(self, serializer):
         # Automatically assign the logged-in user as the author
         serializer.save(author=self.request.user)
 
-    def get_queryset(self):
-        # Show all recipes or only the user's recipes if authenticated
-        if self.request.user.is_authenticated:
-            return Recipe.objects.filter(author=self.request.user)
-        return Recipe.objects.all()
+    # def get_queryset(self):
+    #     # Show all recipes if authenticated
+    #     #if self.request.user.is_authenticated:
+    #         return Recipe.objects.filter(author=self.request.user)
+    #     #return Recipe.objects.all()
