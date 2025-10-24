@@ -1,60 +1,34 @@
-YumBook — Recipe Management Web App
+# 🍴 YumBook — Django Recipe App
 
-YumBook is a full-stack Django recipe management application where users can create, edit, delete, and browse recipes.
-It includes both HTML pages (frontend templates) and REST API endpoints powered by Django REST Framework (DRF).
+**YumBook** is a Django-powered recipe management platform where users can register, log in, and manage their personal recipes.  
+Each user has their own private collection — only accessible after authentication.  
+Built with **Django**, **Django REST Framework (DRF)**, and **PostgreSQL**, YumBook includes both HTML pages and a RESTful API.
 
-Users can:
+---
 
-Store and manage personal recipes
+## 🚀 Features
 
-Add ingredients with quantities
+- ✅ User Registration, Login & Logout (HTML and API)
+- ✅ Create, View, Update, and Delete Recipes
+- ✅ Each user sees only **their own recipes**
+- ✅ Token-based API Authentication
+- ✅ Pagination and sorting for recipe listings
+- ✅ Ingredient management for each recipe
+- ✅ Clean validation for time/duration fields
+- ✅ Admin interface for superusers
 
-Upload images
+---
 
-Browse all recipes
+## 🧩 Tech Stack
 
-Search by ingredients or category
+Backend Framework -	Django 5.x
+API Framework	- Django REST Framework
+Authentication -	DRF Token Auth
+Database	= postgreSQL
+Frontend	- Django Templates (HTML, CSS, JS)
+Media Storage	- Django File Storage (images in /media/)
 
-Use the REST API for integration with frontend apps or mobile clients
-
-🚀 Features
-👩‍🍳 Core Functionality
-
-Create, read, update, and delete recipes
-
-Manage ingredients and their quantities
-
-View detailed recipe pages
-
-Upload recipe images
-
-🔐 Authentication
-
-User registration and login (HTML and API)
-
-DRF token authentication
-
-Restricted access to editing/deleting recipes (only the author)
-
-🧭 API + HTML Separation
-
-/recipes/ → HTML-based pages for web users
-
-/api/recipes/ → REST API endpoints for external clients
-
-🔎 Search
-
-Filter and search recipes by ingredients or category
-
-🏗️ Tech Stack
-Layer	Technology
-Backend Framework	Django 5.x
-API Framework	Django REST Framework
-Authentication	DRF Token Auth
-Database	postgreSQL
-Frontend	Django Templates (HTML, CSS, JS)
-Media Storage	Django File Storage (images in /media/)
-🧩 Project Structure
+## 🧩 Project Structure
 yumbook_backend/
 │
 ├── accounts/                   # User accounts & authentication
@@ -78,97 +52,149 @@ yumbook_backend/
 │
 ├── media/                      # Uploaded images
 └── manage.py
+---
 
-⚙️ Installation & Setup
-1️⃣ Clone the repository
-git clone https://github.com/<your-username>/yumbook.git
-cd yumbook
+## 🧑‍🍳 Core Models
 
-2️⃣ Create and activate a virtual environment
-python -m venv venv
-venv\Scripts\activate        # Windows
-# or
-source venv/bin/activate     # macOS / Linux
+### `CustomUser`
+Extends Django’s `AbstractUser` with:
+- `email` (unique)
+- `bio`
+- `profile_photo`
 
-3️⃣ Install dependencies
-pip install -r requirements.txt
+### `Recipe`
+Fields include:
+- `author` (FK to `CustomUser`)
+- `title`
+- `instructions`
+- `prep_time`, `cook_time` (with duration validation)
+- `images`
+- `category`
+- `servings`
 
-4️⃣ Apply migrations
-python manage.py makemigrations
-python manage.py migrate
+### `IngredientsQuantity`
+- Linked to `Recipe`
+- Has `item` and `quantity` fields
 
-5️⃣ Create a superuser
-python manage.py createsuperuser
+---
 
-6️⃣ Run the development server
-python manage.py runserver
+## 🔐 Authentication
+
+- **HTML Login:** `/accounts/login/`
+- **API Token Login:** `POST /accounts/api/login/`
+- **API Token Logout:** `POST /accounts/api/logout/`
+- **Register (HTML):** `/accounts/register/`
+- **Register (API):** `POST /accounts/api/register/`
+
+Use the returned token to access authenticated endpoints:
+Authorization: Token your_token_here
 
 
-Visit:
+---
 
-Admin Panel: http://127.0.0.1:8000/admin/
+## 🧪 Testing the API
 
-HTML Recipes App: http://127.0.0.1:8000/recipes/
-
-API Endpoints: http://127.0.0.1:8000/api/recipes/
-
-🔑 API Endpoints Overview
-Endpoint	Method	Description
-/api/recipes/	GET	List all recipes
-/api/recipes/<id>/	GET	Retrieve a specific recipe
-/api/recipes/	POST	Create a new recipe
-/api/recipes/<id>/	PUT/PATCH	Update a recipe
-/api/recipes/<id>/	DELETE	Delete a recipe
-/api/accounts/register/	POST	Register a new user
-/api/accounts/login/	POST	Obtain authentication token
-🧾 Example Recipe JSON
+### 🔹 1. Register a user
+`POST /accounts/api/register/`
+```json
 {
-  "id": 1,
-  "title": "Spaghetti Bolognese",
-  "category": "Dinner",
-  "ingredients": [
-    {"item": "Spaghetti", "quantity": "200g"},
-    {"item": "Ground Beef", "quantity": "150g"},
-    {"item": "Tomato Sauce", "quantity": "1 cup"}
-  ],
-  "instructions": "Boil spaghetti. Cook beef. Mix with sauce.",
-  "cook_time": "00:30:00",
-  "prep_time": "00:15:00",
-  "author": "admin"
+  "username": "chefamy",
+  "email": "amy@example.com",
+  "password": "strongpassword123"
 }
 
-🖼️ Screenshots
+### 🔹 2. Log in to get a token
+POST /accounts/api/login/
 
-(Optional — add later)
-Add screenshots of your recipe list, detail, and admin pages here.
+json
 
-🧪 Testing
+{
+  "username": "chefamy",
+  "password": "strongpassword123"
+}
+Response:
 
-Run Django’s test suite:
+json
 
-python manage.py test
+{
+  "token": "abcdef123456...",
+  "user": {
+    "id": 1,
+    "username": "chefamy",
+    "email": "amy@example.com"
+  }
+}
 
-🧰 Development Notes
+### 🔹 3. Create a recipe
+POST /recipes/api/recipes/
+(Include token in Authorization header)
 
-Static and media files are served locally in debug mode.
+json
 
-To serve media in production, configure a storage backend (e.g., S3, Cloudinary).
+{
+  "title": "Lasagna",
+  "instructions": "Layer pasta, meat sauce, and cheese. Bake for 45 minutes.",
+  "prep_time": "00:30:00",
+  "cook_time": "01:00:00",
+  "category": "Italian",
+  "servings": 4
+}
 
-Templates use Bootstrap / custom CSS (optional).
+### 🔹 4. Get your recipes
+GET /recipes/api/recipes/
 
-🤝 Contributing
+⚙️ Installation & Setup
+Clone the repository:
 
-Fork the project
+bash
+Copy code
+git clone https://github.com/fredamakarie/yumbook-django.git
+cd yumbook-django
+Create a virtual environment and install dependencies:
 
-Create a new feature branch (git checkout -b feature/new-feature)
+bash
+Copy code
+python -m venv venv
+source venv/bin/activate   # (Windows: venv\Scripts\activate)
+pip install -r requirements.txt
+Set up your .env file:
 
-Commit your changes (git commit -m "Add new feature")
+env
+Copy code
+DB_NAME=yumbook_db
+DB_USER=postgres
+DB_PASSWORD=yourpassword
+DB_HOST=localhost
+DB_PORT=5432
+Apply migrations:
 
-Push to your branch (git push origin feature/new-feature)
+bash
+Copy code
+python manage.py makemigrations
+python manage.py migrate
+Run the development server:
 
-Open a Pull Request
+bash
+Copy code
+python manage.py runserver
+Access the app:
 
-🧠 Future Improvements
+HTML interface → http://127.0.0.1:8000/
+
+Admin dashboard → http://127.0.0.1:8000/admin/
+
+API endpoints → http://127.0.0.1:8000/recipes/api/
+
+## 🧠 Developer Notes
+DRF Pagination is enabled (PAGE_SIZE = 6).
+
+Recipes are user-scoped — users can only view, edit, or delete their own recipes.
+
+Time fields (prep_time, cook_time) include robust validation to handle common mistakes like "30" or "00:45:00".
+
+After logout, tokens are invalidated and cannot be reused.
+
+## 🧠 Future Improvements
 
 Public sharing of recipes
 
@@ -178,6 +204,5 @@ API pagination and filtering
 
 React or Vue frontend integration
 
-🪪 License
-
-This project is licensed under the MIT License — see the LICENSE file for details
+🧾 License
+This project is licensed under the MIT License.

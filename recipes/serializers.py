@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Recipe, IngredientsQuantity
+from datetime import timedelta
 
 class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
@@ -49,3 +50,37 @@ class RecipeSerializer(serializers.ModelSerializer):
             IngredientsQuantity.objects.create(recipe=instance, **ingredient)
 
         return instance
+    
+    def validate_prep_time(self, value):
+        """Ensure prep_time is valid format or return friendly error."""
+        return self._validate_duration(value, 'prep_time')
+
+    def validate_cook_time(self, value):
+        """Ensure cook_time is valid format or return friendly error."""
+        return self._validate_duration(value, 'cook_time')
+
+    def _validate_duration(self, value, field_name):
+        if isinstance(value, timedelta) or value is None:
+            return value
+
+        # Handle if passed as string
+        try:
+            if isinstance(value, str):
+                parts = value.split(':')
+                if len(parts) == 3:
+                    h, m, s = map(int, parts)
+                    return timedelta(hours=h, minutes=m, seconds=s)
+                elif len(parts) == 2:
+                    h, m = map(int, parts)
+                    return timedelta(hours=h, minutes=m)
+                elif len(parts) == 1:
+                    m = int(parts[0])
+                    return timedelta(minutes=m)
+        except ValueError:
+            raise serializers.ValidationError(
+                f"Invalid format for {field_name}. Use 'HH:MM:SS' or total minutes (e.g. '00:30:00' or '30')."
+            )
+
+        raise serializers.ValidationError(
+            f"Invalid value for {field_name}. Use 'HH:MM:SS' or 'MM'."
+        )
